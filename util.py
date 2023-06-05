@@ -29,9 +29,7 @@ class Utilidades:
     
     @staticmethod
     def validar_nome_descricao(texto: str) -> str:
-        print('TEXTO AQUI = ', texto)
         for c in texto:
             if not c.isalnum() and not c == ' ' and not c == ',':
-                print('ERRO AQUI')
                 raise ValueError
         return texto
