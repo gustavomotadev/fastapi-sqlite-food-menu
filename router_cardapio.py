@@ -2,71 +2,100 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from typing import Annotated, List
 from dtos import *
 from util import Utilidades
-from db import cardapios, produtos
+from repositorio_produto import RepositorioProduto
+from repositorio_cardapio import RepositorioCardapio
+from dependencias import obter_repo_produto, obter_repo_cardapio 
 
 router = APIRouter()
 
 @router.get('/cardapio/')
-async def listar_cardapios() -> List[CardapioCompleto]:
+async def listar_cardapios(
+    repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)]
+) -> List[CardapioCompleto]:
 
-    return [CardapioCompleto(**cardapio) 
-        for cardapio in cardapios.values()]
+    return repo_cardapio.consultar_todos_cardapios()
 
 @router.get('/cardapio/{codigo_cardapio}')
-async def consultar_cardapio(codigo_cardapio: str) -> CardapioCompleto:
+async def consultar_cardapio(codigo_cardapio: str,
+    repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)]
+) -> CardapioCompleto:
 
-    if codigo_cardapio not in cardapios:
+    cardapio = repo_cardapio.consultar_cardapio(codigo_cardapio)
+
+    if not cardapio:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
             'Cardápio não encontrado.')
 
-    return CardapioCompleto(**cardapios[codigo_cardapio])
+    return cardapio
 
 @router.post('/cardapio/', status_code=status.HTTP_201_CREATED)
 async def cadastrar_cardapio(cardapio: Cardapio,
-    util: Annotated[Utilidades, Depends(Utilidades)]) -> CardapioCompleto:
+    util: Annotated[Utilidades, Depends(Utilidades)],
+    repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)]
+) -> CardapioCompleto:
 
     codigo = util.criar_codigo(cardapio.nome)
 
-    if codigo in cardapios:
+    if repo_cardapio.consultar_cardapio(codigo):
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
             'Código já existe.')
 
-    cardapios[codigo] = {**cardapio.dict(), 'codigo': codigo}
-    return CardapioCompleto(**cardapios[codigo])
+    criado = repo_cardapio.criar_cardapio(
+        codigo, cardapio.nome, cardapio.descricao)
+    
+    if not criado:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
+            'Não foi possível criar cardápio.')
+
+    return repo_cardapio.consultar_cardapio(codigo)
 
 @router.put('/cardapio/{codigo_cardapio}')
-async def alterar_cardapio(codigo_cardapio: str, 
-    cardapio: Cardapio) -> CardapioCompleto:
+async def alterar_cardapio(codigo_cardapio: str, cardapio: Cardapio,
+    repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)]
+) -> CardapioCompleto:
 
-    if codigo_cardapio not in cardapios:
+    if not repo_cardapio.consultar_cardapio(codigo_cardapio):
         raise HTTPException(status.HTTP_404_NOT_FOUND,
             'Cardápio não encontrado.')
 
-    cardapios[codigo_cardapio] = {**cardapio.dict(), 
-        'codigo': codigo_cardapio}
-    return CardapioCompleto(**cardapios[codigo_cardapio])
+    repo_cardapio.alterar_cardapio(
+        codigo_cardapio, cardapio.nome, cardapio.descricao)
+    
+    return repo_cardapio.consultar_cardapio(codigo_cardapio)
 
 @router.delete('/cardapio/{codigo_cardapio}')
-async def remover_cardapio(codigo_cardapio: str) -> CardapioCompleto:
+async def remover_cardapio(codigo_cardapio: str,
+    repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)],
+    repo_produto: Annotated[RepositorioProduto, Depends(obter_repo_produto)]
+) -> CardapioCompleto:
 
-    if codigo_cardapio not in cardapios:
+    cardapio = repo_cardapio.consultar_cardapio(codigo_cardapio)
+
+    if not cardapio:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
             'Cardápio não encontrado.')
     
-    if len([codigo for codigo, produto in produtos.items() if 
-           produto['codigo_cardapio'] == codigo_cardapio]) > 0:
+    if repo_produto.consultar_todos_produtos(codigo_cardapio):
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
             'Não é possível deletar. Cardápio possui produtos.')
 
-    return CardapioCompleto(**cardapios.pop(codigo_cardapio))
+    return cardapio
 
 @router.patch('/cardapio/{codigo_cardapio}')
 async def alterar_descricao_cardapio(codigo_cardapio: str, 
-    descricao: DescricaoCardapio) -> CardapioCompleto:
+    descricao: DescricaoCardapio,
+    repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)]
+) -> CardapioCompleto:
+    
+    cardapio = repo_cardapio.consultar_cardapio(codigo_cardapio)
 
-    if codigo_cardapio not in cardapios:
+    if not cardapio:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
             'Cardápio não encontrado.')
 
-    cardapios[codigo_cardapio]['descricao'] = descricao.descricao
-    return CardapioCompleto(**cardapios[codigo_cardapio])
+    cardapio['descricao'] = descricao.descricao
+
+    repo_cardapio.alterar_cardapio(
+        codigo_cardapio, cardapio['nome'], cardapio['descricao'])
+
+    return cardapio
