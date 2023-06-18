@@ -55,7 +55,7 @@ async def cadastrar_produto(produto: Produto,
     
     if not criado:
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
-            'Não foi possível criar produto.')
+            'Não foi possível criar produto')
 
     return repo_produto.consultar_produto(codigo)
 
@@ -73,8 +73,12 @@ async def alterar_produto(codigo_produto: str, produto: Produto,
         raise HTTPException(status.HTTP_404_NOT_FOUND,
             'Cardápio não encontrado.')
 
-    repo_produto.alterar_produto(codigo_produto, produto.codigo_cardapio,
+    alterado = repo_produto.alterar_produto(codigo_produto, produto.codigo_cardapio,
         produto.nome, produto.descricao, produto.preco, produto.restricao)
+    
+    if not alterado:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
+            'Não foi possível alterar produto')
     
     return repo_produto.consultar_produto(codigo_produto)
 
@@ -89,7 +93,11 @@ async def remover_produto(codigo_produto: str,
         raise HTTPException(status.HTTP_404_NOT_FOUND,
             'Produto não encontrado.')
     
-    repo_produto.remover_produto(codigo_produto)
+    removido = repo_produto.remover_produto(codigo_produto)
+
+    if removido == 0:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
+            'Não foi possível remover produto')
 
     return produto
 
@@ -106,9 +114,11 @@ async def alterar_preco_produto(codigo_produto: str, preco: PrecoProduto,
 
     produto['preco'] = preco.preco
 
-    repo_produto.alterar_produto(codigo_produto, 
-        produto['codigo_cardapio'], produto['nome'], 
-        produto['descricao'], produto['preco'], 
-        produto['restricao'])
+    alterado = repo_produto.alterar_produto(codigo_produto, produto['codigo_cardapio'],
+        produto['nome'], produto['descricao'], produto['preco'], produto['restricao'])
+    
+    if alterado == 0:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
+            'Não foi possível alterar produto.')
 
     return produto

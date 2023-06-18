@@ -58,8 +58,12 @@ async def alterar_cardapio(codigo_cardapio: str, cardapio: Cardapio,
         raise HTTPException(status.HTTP_404_NOT_FOUND,
             'Cardápio não encontrado.')
 
-    repo_cardapio.alterar_cardapio(
+    alterado = repo_cardapio.alterar_cardapio(
         codigo_cardapio, cardapio.nome, cardapio.descricao)
+
+    if not alterado:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
+            'Não foi possível alterar cardápio.')
     
     return repo_cardapio.consultar_cardapio(codigo_cardapio)
 
@@ -78,6 +82,12 @@ async def remover_cardapio(codigo_cardapio: str,
     if repo_produto.consultar_todos_produtos(codigo_cardapio):
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
             'Não é possível deletar. Cardápio possui produtos.')
+    
+    removido = repo_cardapio.remover_cardapio(codigo_cardapio)
+
+    if not removido:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
+            'Não foi possível remover cardápio.')
 
     return cardapio
 
@@ -95,7 +105,11 @@ async def alterar_descricao_cardapio(codigo_cardapio: str,
 
     cardapio['descricao'] = descricao.descricao
 
-    repo_cardapio.alterar_cardapio(
+    alterado = repo_cardapio.alterar_cardapio(
         codigo_cardapio, cardapio['nome'], cardapio['descricao'])
+    
+    if not alterado:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
+            'Não foi possível alterar cardápio.')
 
     return cardapio

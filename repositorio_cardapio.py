@@ -52,7 +52,7 @@ class RepositorioCardapio:
         self.connection.commit()
         return self.obter_mudancas()
     
-    def remover_produto(self, codigo: str) -> int:
+    def remover_cardapio(self, codigo: str) -> int:
         query = 'DELETE FROM cardapio WHERE codigo = ?'
         self.cursor.execute(query, (codigo,))
         self.connection.commit()
