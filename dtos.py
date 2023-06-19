@@ -1,5 +1,5 @@
 from typing import Literal
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, SecretStr
 from util import Utilidades
 
 class CardapioCompleto(BaseModel):
@@ -63,3 +63,33 @@ class Produto(BaseModel):
 
 class PrecoProduto(BaseModel):
     preco: float = Field(gt=0)
+
+class Usuario(BaseModel):
+    usuario: str = Field(min_length=6, max_length=20)
+    nome: str = Field(min_length=6, max_length=20)
+    cargo: str = Field(min_length=2, max_length=20)
+
+    @validator('usuario')
+    def validar_usuario(texto: str) -> str:
+        return Utilidades.validar_usuario(texto)
+
+    @validator('nome', 'cargo')
+    def validar_nome_cargo(texto: str) -> str:
+        return Utilidades.validar_nome_cargo(texto)
+    
+class Cadastro(BaseModel):
+    nome: str = Field(min_length=6, max_length=20)
+    cargo: str = Field(min_length=2, max_length=20)
+    senha: SecretStr = Field(min_length=6, max_length=20)
+
+    @validator('nome', 'cargo')
+    def validar_nome_cargo(texto: str) -> str:
+        return Utilidades.validar_nome_cargo(texto)
+    
+    @validator('senha')
+    def validar_senha(senha: SecretStr) -> SecretStr: 
+        return Utilidades.validar_senha(senha)
+    
+class BearerToken(BaseModel):
+    access_token: str
+    token_type: Literal['bearer'] = Field(default='bearer')

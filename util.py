@@ -1,4 +1,5 @@
 import unicodedata
+from pydantic import SecretStr
 
 class Utilidades:
 
@@ -33,3 +34,25 @@ class Utilidades:
             if not c.isalnum() and not c == ' ' and not c == ',':
                 raise ValueError
         return texto
+    
+    @staticmethod
+    def validar_usuario(usuario: str) -> str:
+        for c in usuario:
+            if not c.isalnum() and not c == '.':
+                raise ValueError
+        return usuario
+    
+    @staticmethod
+    def validar_nome_cargo(texto: str) -> str:
+        for c in texto:
+            if not c.isalnum() and not c == ' ':
+                raise ValueError
+        return texto
+    
+    @staticmethod
+    def validar_senha(senha: SecretStr) -> SecretStr:
+        for c in senha.get_secret_value():
+            if not c.isalnum() and c not in '._?!@#$%&-+*=':
+                raise ValueError
+        return senha
+    

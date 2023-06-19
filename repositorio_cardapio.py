@@ -1,5 +1,5 @@
 import sqlite3
-from typing import List, Literal
+from typing import List
 
 class RepositorioCardapio:
 
