@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from typing import Annotated, List
+from typing import List
+from typing_extensions import Annotated
 from dtos import *
 from util import Utilidades
 from repositorio_produto import RepositorioProduto

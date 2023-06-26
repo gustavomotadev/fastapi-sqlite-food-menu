@@ -1,4 +1,4 @@
-from typing import Literal
+from typing_extensions import Literal
 from pydantic import BaseModel, Field, validator, SecretStr
 from util import Utilidades
 

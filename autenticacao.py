@@ -2,7 +2,7 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timedelta, timezone
 from bcrypt import gensalt, hashpw
-from typing import Optional
+from typing import Optional, Union
 
 class Autenticador(object):
 
@@ -30,7 +30,7 @@ class Autenticador(object):
         token = jwt.encode(payload, self._chave_privada, self._algoritmo_chave)
         return token
     
-    def validar_token_jwt(self, token: str) -> dict | None:
+    def validar_token_jwt(self, token: str) -> Union[dict, None]:
         try:
             dados = jwt.decode(token, self._chave_publica, self._algoritmo_chave, 
                 options={"require": ["iat", "exp"]})

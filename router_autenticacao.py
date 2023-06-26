@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from typing import Annotated
+from typing_extensions import Annotated
 from fastapi.security import OAuth2PasswordRequestForm
 from dtos import *
 from dependencias import esquema_oauth2, obter_autenticador
