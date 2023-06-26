@@ -12,7 +12,7 @@ INSERT OR IGNORE INTO cardapio (codigo, nome, descricao)
 VALUES
     ('massas', 'Massas', 'Massas da casa'),
     ('sobremesas', 'Sobremesas', 'Sobremesas da casa'),
-    ('fastfood', 'Fast Food', 'Comidas rï¿½pidas da casa');
+    ('fastfood', 'Fast Food', 'Comidas rápidas da casa');
 	
 CREATE TABLE IF NOT EXISTS produto (
     codigo TEXT PRIMARY KEY,
@@ -31,7 +31,7 @@ VALUES
     ('Talharim', 'Talharim ao molho', 19.90, 'vegetariano', 'massas', 'talharim'),
     ('Petit Gateau', 'Petit Gateau', 9.90, 'vegetariano', 'sobremesas', 'petit-gateau'),
     ('Batata Frita', 'Batata Frita', 10.90, 'vegano', 'fastfood', 'batata-frita'),
-    ('X Burguer', 'Hambï¿½rguer com Queijo', 15.90, 'padrao', 'fastfood', 'x-burguer');
+    ('X Burguer', 'Hambúrguer com Queijo', 15.90, 'padrao', 'fastfood', 'x-burguer');
 
 CREATE TABLE IF NOT EXISTS credencial (
     usuario TEXT PRIMARY KEY,

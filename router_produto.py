@@ -5,6 +5,7 @@ from util import Utilidades
 from repositorio_produto import RepositorioProduto
 from repositorio_cardapio import RepositorioCardapio
 from dependencias import obter_repo_produto, obter_repo_cardapio 
+from router_autenticacao import obter_usuario_logado
 
 router = APIRouter()
 
@@ -38,7 +39,8 @@ async def consultar_produto(codigo_produto: str,
 
     return produto
 
-@router.post('/produto/', status_code=status.HTTP_201_CREATED)
+@router.post('/produto/', status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(obter_usuario_logado)])
 async def cadastrar_produto(produto: Produto, 
     repo_produto: Annotated[RepositorioProduto, Depends(obter_repo_produto)],
     repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)],
@@ -62,8 +64,13 @@ async def cadastrar_produto(produto: Produto,
 @router.put('/produto/{codigo_produto}')
 async def alterar_produto(codigo_produto: str, produto: Produto,
     repo_produto: Annotated[RepositorioProduto, Depends(obter_repo_produto)],
-    repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)]
+    repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)],
+    logado: Annotated[Usuario, Depends(obter_usuario_logado)]
 ) -> ProdutoCompleto:
+    
+    if logado.cargo.lower() != 'gerente':
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+            'Não possui autorização para alterar produto')
 
     if not repo_produto.consultar_produto(codigo_produto):
         raise HTTPException(status.HTTP_404_NOT_FOUND,
@@ -84,8 +91,13 @@ async def alterar_produto(codigo_produto: str, produto: Produto,
 
 @router.delete('/produto/{codigo_produto}')
 async def remover_produto(codigo_produto: str,
-    repo_produto: Annotated[RepositorioProduto, Depends(obter_repo_produto)]
+    repo_produto: Annotated[RepositorioProduto, Depends(obter_repo_produto)],
+    logado: Annotated[Usuario, Depends(obter_usuario_logado)]
 ) -> ProdutoCompleto:
+    
+    if logado.cargo.lower() != 'gerente':
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+            'Não possui autorização para remover produto')
     
     produto = repo_produto.consultar_produto(codigo_produto)
 
@@ -103,8 +115,13 @@ async def remover_produto(codigo_produto: str,
 
 @router.patch('/produto/{codigo_produto}')
 async def alterar_preco_produto(codigo_produto: str, preco: PrecoProduto, 
-    repo_produto: Annotated[RepositorioProduto, Depends(obter_repo_produto)]
+    repo_produto: Annotated[RepositorioProduto, Depends(obter_repo_produto)],
+    logado: Annotated[Usuario, Depends(obter_usuario_logado)]
 ) -> ProdutoCompleto:
+    
+    if logado.cargo.lower() != 'gerente':
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+            'Não possui autorização para remover produto')
     
     produto = repo_produto.consultar_produto(codigo_produto)
 

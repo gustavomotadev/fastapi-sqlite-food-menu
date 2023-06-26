@@ -5,6 +5,7 @@ from util import Utilidades
 from repositorio_produto import RepositorioProduto
 from repositorio_cardapio import RepositorioCardapio
 from dependencias import obter_repo_produto, obter_repo_cardapio 
+from router_autenticacao import obter_usuario_logado
 
 router = APIRouter()
 
@@ -28,7 +29,8 @@ async def consultar_cardapio(codigo_cardapio: str,
 
     return cardapio
 
-@router.post('/cardapio/', status_code=status.HTTP_201_CREATED)
+@router.post('/cardapio/', status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(obter_usuario_logado)])
 async def cadastrar_cardapio(cardapio: Cardapio,
     util: Annotated[Utilidades, Depends(Utilidades)],
     repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)]
@@ -51,8 +53,13 @@ async def cadastrar_cardapio(cardapio: Cardapio,
 
 @router.put('/cardapio/{codigo_cardapio}')
 async def alterar_cardapio(codigo_cardapio: str, cardapio: Cardapio,
-    repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)]
+    repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)],
+    logado: Annotated[Usuario, Depends(obter_usuario_logado)]
 ) -> CardapioCompleto:
+    
+    if logado.cargo.lower() != 'gerente':
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+            'Não possui autorização para alterar cardápio')
 
     if not repo_cardapio.consultar_cardapio(codigo_cardapio):
         raise HTTPException(status.HTTP_404_NOT_FOUND,
@@ -70,8 +77,13 @@ async def alterar_cardapio(codigo_cardapio: str, cardapio: Cardapio,
 @router.delete('/cardapio/{codigo_cardapio}')
 async def remover_cardapio(codigo_cardapio: str,
     repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)],
-    repo_produto: Annotated[RepositorioProduto, Depends(obter_repo_produto)]
+    repo_produto: Annotated[RepositorioProduto, Depends(obter_repo_produto)],
+    logado: Annotated[Usuario, Depends(obter_usuario_logado)]
 ) -> CardapioCompleto:
+    
+    if logado.cargo.lower() != 'gerente':
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+            'Não possui autorização para remover cardápio')
 
     cardapio = repo_cardapio.consultar_cardapio(codigo_cardapio)
 
@@ -94,8 +106,13 @@ async def remover_cardapio(codigo_cardapio: str,
 @router.patch('/cardapio/{codigo_cardapio}')
 async def alterar_descricao_cardapio(codigo_cardapio: str, 
     descricao: DescricaoCardapio,
-    repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)]
+    repo_cardapio: Annotated[RepositorioCardapio, Depends(obter_repo_cardapio)],
+    logado: Annotated[Usuario, Depends(obter_usuario_logado)]
 ) -> CardapioCompleto:
+    
+    if logado.cargo.lower() != 'gerente':
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+            'Não possui autorização para alterar cardápio')
     
     cardapio = repo_cardapio.consultar_cardapio(codigo_cardapio)
 
