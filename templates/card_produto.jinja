@@ -1,0 +1,17 @@
+<a class="text-decoration-none" href="{{url_for('obter_produto', codigo_produto=produto.codigo)}}">
+  <div class="card p-1">
+    <img src="{{url_for('static', path='/'+produto.codigo+'.jpg')}}" class="card-img-top rounded-1" alt="{{produto.nome}}">
+    <div class="card-body">
+      <div class="d-flex flex-row justify-content-between">
+        <h5 class="card-title">{{produto.nome}}</h5>
+        {% if produto.restricao == 'vegano' %} 
+          <span class="card-text" style="color: #898121;">{{produto.restricao}}</span>
+        {% elif produto.restricao == 'vegetariano' %}
+          <span class="card-text" style="color: #E7B10A;">{{produto.restricao}}</span>
+        {% endif %}
+      </div>
+      <p class="card-text">{{produto.descricao}}</p>
+      <p class="card-text">R${{"%0.2f" | format(produto.preco)}}</p>
+    </div>
+  </div>
+</a>

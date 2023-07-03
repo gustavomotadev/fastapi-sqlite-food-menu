@@ -1,0 +1,10 @@
+<div class="container mt-3">
+    <div class="row">
+        {% for item in cardapios %}
+            {% set cardapio = item %}
+            <div class="mt-3 mb-3 col-md-4">
+                {% include "card_cardapio.jinja" %}
+            </div>
+        {% endfor %}
+    </div>
+</div>

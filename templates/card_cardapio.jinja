@@ -1,0 +1,9 @@
+<a class="text-decoration-none" href="{{url_for('obter_cardapio', codigo_cardapio=cardapio.codigo)}}">
+  <div class="card p-1">
+    <img src="{{url_for('static', path='/'+cardapio.codigo+'.jpg')}}" class="card-img-top rounded-1" alt="{{cardapio.nome}}">
+    <div class="card-body">
+      <h5 class="card-title">{{cardapio.nome}}</h5>
+      <p class="card-text">{{cardapio.descricao}}</p>
+    </div>
+  </div>
+</a>
